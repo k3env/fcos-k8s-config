@@ -1,0 +1,34 @@
+variant: fcos
+version: 1.5.0
+ignition:
+  config:
+    merge:
+      - local: .tmp/k8s.ign
+      - local: .tmp/ssh-github-keys.ign
+storage:
+  links:
+    - path: /etc/localtime
+      target: ../usr/share/zoneinfo/Asia/Irkutsk
+  files:
+    - path: /etc/hostname
+      mode: 0644
+      contents:
+        local: hostname
+systemd:
+  units:
+    - name: serial-getty@tty1.service
+      enabled: true
+      dropins:
+      - name: autologin-k3env.conf
+        contents: |
+          [Service]
+          # Override Execstart in main unit
+          ExecStart=
+          # Add new Execstart with `-` prefix to ignore failure`
+          ExecStart=-/usr/sbin/agetty --autologin k3env --noclear %I $TERM
+passwd: # setting login credentials
+  users:
+    - name: k3env
+      groups:
+        - sudo
+        - wheel

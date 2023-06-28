@@ -1,0 +1,16 @@
+{
+  "name": "fcos-config",
+  "version": "1.0.0",
+  "scripts": {
+    "preheat": "npm run ignite-k8s && npm run ignite-github-keys",
+    "ignite-k8s": "butane -d ./ k8s.bu.yaml -o .tmp/k8s.ign",
+    "ignite-github-keys": "butane -d ./ ssh-github-keys.bu.yaml -o .tmp/ssh-github-keys.ign",
+    "ignite": "bash helpers/ignite-host",
+    "clean": "rm -rf .tmp",
+    "setup": "mkdir -p config .tmp && wget https://github.com/TheWaWaR/simple-http-server/releases/download/v0.6.7/x86_64-unknown-linux-musl-simple-http-server -O helpers/shttp && chmod +x helpers/shttp",
+    "purge": "npm run clean && rm -rf config",
+    "serve": "helpers/shttp config"
+  },
+  "author": "k3env",
+  "license": "ISC"
+}

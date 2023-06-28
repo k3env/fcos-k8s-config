@@ -1,0 +1,4 @@
+*.ign
+.tmp/
+config/
+helpers/shttp

@@ -1,0 +1,44 @@
+variant: fcos
+version: 1.5.0
+storage:
+  files:
+    - path: /etc/ssh/helpers/github-key
+      mode: 0755
+      contents:
+        local: github-ssh-keys/github-key
+    - path: /var/k3env/github-ssh-keys/selinux-policy.pp
+      mode: 0644
+      contents:
+        local: github-ssh-keys/policy.pp
+    - path: /etc/ssh/sshd_config.d/10-github-keys.conf
+      mode: 0644
+      contents:
+        inline: |
+          AuthorizedKeysCommand /etc/ssh/helpers/github-key %u
+          AuthorizedKeysCommandUser nobody
+systemd:
+  units:
+    - name: github-ssh-keys-selinux-policy.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=SELinux Policy for github-ssh-keys
+        Wants=network-online.target
+        After=network-online.target
+        # We run before `zincati.service` to avoid conflicting rpm-ostree
+        # transactions.
+        Before=zincati.service
+        ConditionPathExists=!/var/k3env/%N.stamp
+
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        # `--allow-inactive` ensures that rpm-ostree does not return an error
+        # if the package is already installed. This is useful if the package is
+        # added to the root image in a future Fedora CoreOS release as it will
+        # prevent the service from failing.
+        ExecStart=/usr/sbin/semodule -i /var/k3env/github-ssh-keys/selinux-policy.pp
+        ExecStart=/bin/touch /var/lib/%N.stamp
+
+        [Install]
+        WantedBy=multi-user.target

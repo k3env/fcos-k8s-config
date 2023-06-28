@@ -1,0 +1,2 @@
+#!/usr/bin/bash
+curl --silent --fail https://github.com/$1.keys
